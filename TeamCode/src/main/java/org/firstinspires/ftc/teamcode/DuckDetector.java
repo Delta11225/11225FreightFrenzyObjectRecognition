@@ -4,8 +4,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.checkerframework.checker.units.qual.degrees;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -43,6 +45,7 @@ import java.util.List;
 public class DuckDetector extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
+    private Servo servoTest;
 
     //0 means skystone, 1 means yellow stone
     //-1 for debug, but we can keep it like this because if it works, it should change to either 0 or 255
@@ -68,6 +71,8 @@ public class DuckDetector extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        servoTest = hardwareMap.get(Servo.class, "servoTest");
+        servoTest.setPosition(0);
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -82,7 +87,7 @@ public class DuckDetector extends LinearOpMode {
 
         waitForStart();
         runtime.reset();
-        while (opModeIsActive()) {
+
             telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
             telemetry.addData("Height", rows);
             telemetry.addData("Width", cols);
@@ -93,28 +98,33 @@ public class DuckDetector extends LinearOpMode {
             if (valLeft > 200) {
                 telemetry.addData("Position", "Left");
                 telemetry.update();
-                //call movement functions
+                // move to 0 degrees.
+                servoTest.setPosition(0);
+                sleep(1000);
             }
             else if (valMid > 200) {
                 telemetry.addData("Position", "Middle");
                 telemetry.update();
-                //call movement functions
+                // move to 90 degrees.
+                servoTest.setPosition(0.5);
+                sleep(1000);
             }
 
             else if (valRight > 200) {
                 telemetry.addData("Position", "Right");
                 telemetry.update();
-                //call movement functions
+                // move to 180 degrees.
+                servoTest.setPosition(1);
+                sleep(1000);
             }
 
 
             telemetry.update();
-            sleep(10000);
+            //sleep(1000);
             //call movement functions
 
-
         }
-    }
+
 
     //detection pipeline
     static class StageSwitchingPipeline extends OpenCvPipeline
