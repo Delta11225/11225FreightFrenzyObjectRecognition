@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.vision;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -35,7 +35,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 @TeleOp
-public class WebcamExample extends LinearOpMode
+public class WebcamExample2 extends LinearOpMode
 {
     OpenCvCamera webcam;
 
@@ -181,48 +181,48 @@ public class WebcamExample extends LinearOpMode
      * if you're doing something weird where you do need it synchronized with your OpMode thread,
      * then you will need to account for that accordingly.
      */
-    static class SamplePipeline extends OpenCvPipeline
+    class SamplePipeline extends OpenCvPipeline
+{
+    /*
+     * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
+     * highly recommended to declare them here as instance variables and re-use them for
+     * each invocation of processFrame(), rather than declaring them as new local variables
+     * each time through processFrame(). This removes the danger of causing a memory leak
+     * by forgetting to call mat.release(), and it also reduces memory pressure by not
+     * constantly allocating and freeing large chunks of memory.
+     */
+
+    @Override
+    public Mat processFrame(Mat input)
     {
         /*
-         * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
-         * highly recommended to declare them here as instance variables and re-use them for
-         * each invocation of processFrame(), rather than declaring them as new local variables
-         * each time through processFrame(). This removes the danger of causing a memory leak
-         * by forgetting to call mat.release(), and it also reduces memory pressure by not
-         * constantly allocating and freeing large chunks of memory.
+         * IMPORTANT NOTE: the input Mat that is passed in as a parameter to this method
+         * will only dereference to the same image for the duration of this particular
+         * invocation of this method. That is, if for some reason you'd like to save a copy
+         * of this particular frame for later use, you will need to either clone it or copy
+         * it to another Mat.
          */
 
-        @Override
-        public Mat processFrame(Mat input)
-        {
-            /*
-             * IMPORTANT NOTE: the input Mat that is passed in as a parameter to this method
-             * will only dereference to the same image for the duration of this particular
-             * invocation of this method. That is, if for some reason you'd like to save a copy
-             * of this particular frame for later use, you will need to either clone it or copy
-             * it to another Mat.
-             */
+        /*
+         * Draw a simple box around the middle 1/2 of the entire frame
+         */
+        Imgproc.rectangle(
+                input,
+                new Point(
+                        input.cols()/4,
+                        input.rows()/4),
+                new Point(
+                        input.cols()*(3f/4f),
+                        input.rows()*(3f/4f)),
+                new Scalar(0, 255, 0), 4);
 
-            /*
-             * Draw a simple box around the middle 1/2 of the entire frame
-             */
-            Imgproc.rectangle(
-                    input,
-                    new Point(
-                            input.cols()/4,
-                            input.rows()/4),
-                    new Point(
-                            input.cols()*(3f/4f),
-                            input.rows()*(3f/4f)),
-                    new Scalar(0, 255, 0), 4);
+        /**
+         * NOTE: to see how to get data from your pipeline to your OpMode as well as how
+         * to change which stage of the pipeline is rendered to the viewport when it is
+         * tapped, please see {@link PipelineStageSwitchingExample}
+         */
 
-            /**
-             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
-             * to change which stage of the pipeline is rendered to the viewport when it is
-             * tapped, please see {@link PipelineStageSwitchingExample}
-             */
-
-            return input;
-        }
+        return input;
     }
+}
 }

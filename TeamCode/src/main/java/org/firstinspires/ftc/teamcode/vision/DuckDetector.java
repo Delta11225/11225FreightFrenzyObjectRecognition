@@ -1,11 +1,14 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.vision;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.checkerframework.checker.units.qual.degrees;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -38,10 +41,12 @@ import java.util.List;
  *YES
  */
 @Autonomous
-@Disabled
+
 //@Disabled//comment out this line before using
-public class opencvSkystoneDetector extends LinearOpMode {
+public class DuckDetector extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
+
+    private Servo servoTest;
 
     //0 means skystone, 1 means yellow stone
     //-1 for debug, but we can keep it like this because if it works, it should change to either 0 or 255
@@ -49,15 +54,15 @@ public class opencvSkystoneDetector extends LinearOpMode {
     private static int valLeft = -1;
     private static int valRight = -1;
 
-    private static float rectHeight = .6f/8f;
-    private static float rectWidth = 1.5f/8f;
+    private static float rectHeight = 1f/8f;
+    private static float rectWidth =  1f/8f;
 
     private static float offsetX = 0f/8f;//changing this moves the three rects and the three circles left or right, range : (-2, 2) not inclusive
     private static float offsetY = 0f/8f;//changing this moves the three rects and circles up or down, range: (-4, 4) not inclusive
 
     private static float[] midPos = {4f/8f+offsetX, 4f/8f+offsetY};//0 = col, 1 = row
-    private static float[] leftPos = {2f/8f+offsetX, 4f/8f+offsetY};
-    private static float[] rightPos = {6f/8f+offsetX, 4f/8f+offsetY};
+    private static float[] leftPos = {1f/8f+offsetX, 4f/8f+offsetY};
+    private static float[] rightPos = {7f/8f+offsetX, 4f/8f+offsetY};
     //moves all rectangles right or left by amount. units are in ratio to monitor
 
     private final int rows = 640;
@@ -67,6 +72,8 @@ public class opencvSkystoneDetector extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        servoTest = hardwareMap.get(Servo.class, "servoTest");
+        servoTest.setPosition(0);
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -79,20 +86,52 @@ public class opencvSkystoneDetector extends LinearOpMode {
         //width, height
         //width = height in this case, because camera is in portrait mode.
 
+        //code needed for camera to display on FTC Dashboard
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = dashboard.getTelemetry();
+        FtcDashboard.getInstance().startCameraStream(webcam, 10);
+
+        telemetry.update();
         waitForStart();
         runtime.reset();
-        while (opModeIsActive()) {
+
             telemetry.addData("Values", valLeft+"   "+valMid+"   "+valRight);
             telemetry.addData("Height", rows);
             telemetry.addData("Width", cols);
 
             telemetry.update();
             sleep(500);
+
+            if (valLeft > 200) {
+                telemetry.addData("Position", "Left");
+                telemetry.update();
+                // move to 0 degrees.
+                servoTest.setPosition(0);
+                sleep(1000);
+            }
+            else if (valMid > 200) {
+                telemetry.addData("Position", "Middle");
+                telemetry.update();
+                // move to 90 degrees.
+                servoTest.setPosition(0.5);
+                sleep(1000);
+            }
+
+            else if (valRight > 200) {
+                telemetry.addData("Position", "Right");
+                telemetry.update();
+                // move to 180 degrees.
+                servoTest.setPosition(1);
+                sleep(1000);
+            }
+
+
+            telemetry.update();
+            //sleep(1000);
             //call movement functions
 
-
         }
-    }
+
 
     //detection pipeline
     static class StageSwitchingPipeline extends OpenCvPipeline
@@ -231,3 +270,4 @@ public class opencvSkystoneDetector extends LinearOpMode {
 
     }
 }
+
