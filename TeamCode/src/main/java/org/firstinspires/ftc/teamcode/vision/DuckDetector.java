@@ -48,7 +48,7 @@ public class DuckDetector extends LinearOpMode {
 
     private Servo servoTest;
 
-    //0 means skystone, 1 means yellow stone
+
     //-1 for debug, but we can keep it like this because if it works, it should change to either 0 or 255
     private static int valMid = -1;
     private static int valLeft = -1;
@@ -181,8 +181,7 @@ public class DuckDetector extends LinearOpMode {
              */
 
             //color diff cb.
-            //lower cb = more blue = skystone = white
-            //higher cb = less blue = yellow stone = grey
+            
             Imgproc.cvtColor(input, yCbCrChan2Mat, Imgproc.COLOR_RGB2YCrCb);//converts rgb to ycrcb
             Core.extractChannel(yCbCrChan2Mat, yCbCrChan2Mat, 2);//takes cb difference and stores
 
